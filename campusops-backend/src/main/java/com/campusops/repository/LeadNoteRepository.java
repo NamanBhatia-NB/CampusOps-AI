@@ -9,5 +9,6 @@ import java.util.List;
 @Repository
 public interface LeadNoteRepository extends JpaRepository<LeadNote, Long> {
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = {"author"})
     List<LeadNote> findByLeadIdOrderByCreatedAtDesc(Long leadId);
 }
