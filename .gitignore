@@ -24,6 +24,7 @@ target/
 .env
 .env.local
 .env.*.local
+.env.prod
 
 # Credentials
 campusops-worker/credentials/*.json
