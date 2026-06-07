@@ -124,10 +124,10 @@
                                     <div class="glass-card p-3 shadow-sm border-0 bg-surface">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div class="d-flex align-items-center">
-                                                <div class="bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2 small fw-bold" style="width: 28px; height: 28px;" th:text="${note.author.fullName.substring(0,1)}">U</div>
+                                                <div class="bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2 small fw-bold" style="width: 28px; height: 28px;" th:text="${note.author != null && note.author.fullName != null && note.author.fullName.length() > 0 ? note.author.fullName.substring(0,1) : 'U'}">U</div>
                                                 <div>
-                                                    <div class="fw-semibold small lh-1" th:text="${note.author.fullName}">User Name</div>
-                                                    <small class="text-muted" style="font-size: 0.7rem;" th:text="${#temporals.format(note.createdAt, 'MMM dd, yyyy HH:mm')}">Time</small>
+                                                    <div class="fw-semibold small lh-1" th:text="${note.author != null ? note.author.fullName : 'Unknown User'}">User Name</div>
+                                                    <small class="text-muted" style="font-size: 0.7rem;" th:text="${note.createdAt != null ? #temporals.format(note.createdAt, 'MMM dd, yyyy HH:mm') : 'Just now'}">Time</small>
                                                 </div>
                                             </div>
                                             <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill" style="font-size: 0.65rem;" th:if="${note.isInternal}">INTERNAL</span>
@@ -149,7 +149,7 @@
                                     <div class="small">
                                         <span class="fw-semibold text-main" th:text="${act.userName ?: 'System'}">User</span>
                                         <span class="text-muted" th:text="${act.details}">Did something</span>
-                                        <div class="text-muted mt-1" style="font-size: 0.7rem;" th:text="${#temporals.format(act.createdAt, 'MMM dd, yyyy HH:mm')}">Time</div>
+                                        <div class="text-muted mt-1" style="font-size: 0.7rem;" th:text="${act.createdAt != null ? #temporals.format(act.createdAt, 'MMM dd, yyyy HH:mm') : 'Just now'}">Time</div>
                                     </div>
                                 </div>
                             </div>
