@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Conversations - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-main">Conversations</h4>
+            <p class="text-muted small mb-0">View all communication with leads.</p>
+        </div>
+    </div>
+
+    <div class="glass-card shadow-sm p-0">
+        <div th:replace="~{fragments/components :: emptyState('No conversations yet', 'Messages from WhatsApp and Email will appear here.', 'bi-chat-dots text-muted')}"></div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Lead Form - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/leads}" class="btn btn-sm btn-light border me-3 rounded-circle" style="width:32px;height:32px;padding:0;line-height:30px;text-align:center;"><i class="bi bi-arrow-left"></i></a>
+        <h3 class="fw-bold mb-0">Add New Lead</h3>
+    </div>
+
+    <div class="glass-card p-4 border-light">
+        <form th:action="@{${leadId != null ? '/leads/' + leadId + '/edit' : '/leads'}}" method="post" th:object="${leadRequest}">
+            
+            <!-- Personal Info -->
+            <h6 class="fw-bold mb-3 text-primary border-bottom border-light pb-2">Personal Information</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label small fw-medium text-muted">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-surface" th:field="*{fullName}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-medium text-muted">Email Address</label>
+                    <input type="email" class="form-control bg-surface" th:field="*{email}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium text-muted">Phone Number</label>
+                    <input type="text" class="form-control bg-surface" th:field="*{phone}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium text-muted">Date of Birth</label>
+                    <input type="date" class="form-control bg-surface" th:field="*{dateOfBirth}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium text-muted">City</label>
+                    <input type="text" class="form-control bg-surface" th:field="*{city}">
+                </div>
+            </div>
+
+            <!-- Academic Info -->
+            <h6 class="fw-bold mb-3 text-primary border-bottom border-light pb-2">Academic Profile</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label small fw-medium text-muted">Current Qualification</label>
+                    <input type="text" class="form-control bg-surface" th:field="*{qualification}" placeholder="e.g. B.Tech, 12th Standard">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-medium text-muted">Program Interest</label>
+                    <input type="text" class="form-control bg-surface" th:field="*{programInterest}" placeholder="e.g. MBA, B.Sc Computer Science">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-medium text-muted">Parent/Guardian Name</label>
+                    <input type="text" class="form-control bg-surface" th:field="*{parentName}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-medium text-muted">Parent/Guardian Phone</label>
+                    <input type="text" class="form-control bg-surface" th:field="*{parentPhone}">
+                </div>
+            </div>
+
+            <!-- CRM Info -->
+            <h6 class="fw-bold mb-3 text-primary border-bottom border-light pb-2">CRM Details</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium text-muted">Source</label>
+                    <select class="form-select bg-surface" th:field="*{source}">
+                        <option value="Website">Website Form</option>
+                        <option value="Referral">Referral</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Walk-in">Walk-in</option>
+                        <option value="Event">Event/Seminar</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium text-muted">Priority</label>
+                    <select class="form-select bg-surface" th:field="*{priority}">
+                        <option th:each="prio : ${T(com.campusops.entity.enums.Priority).values()}"
+                                th:value="${prio}" th:text="${prio}" th:selected="${prio.name() == 'MEDIUM'}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium text-muted">Assign Owner</label>
+                    <select class="form-select bg-surface" th:field="*{ownerId}">
+                        <option value="">Unassigned</option>
+                        <option th:each="counselor : ${counselors}"
+                                th:value="${counselor.id}" th:text="${counselor.fullName}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top border-light mt-4">
+                <a th:href="@{/leads}" class="btn btn-light bg-surface border">Cancel</a>
+                <button type="submit" class="btn btn-gradient px-4" th:text="${leadId != null ? 'Update Lead' : 'Create Lead'}">Create Lead</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

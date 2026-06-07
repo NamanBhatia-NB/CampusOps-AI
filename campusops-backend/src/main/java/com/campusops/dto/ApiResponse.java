@@ -1,0 +1,57 @@
+package com.campusops.dto;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+
+/**
+ * Generic API response wrapper used across all REST endpoints.
+ *
+ * @param <T> type of the response payload
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ApiResponse<T> {
+
+    private boolean success;
+    private String message;
+    private T data;
+
+    @Builder.Default
+    private Instant timestamp = Instant.now();
+
+    // ─── Static factory methods ──────────────────────────────────────
+
+    public static <T> ApiResponse<T> success(T data) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .message("Operation successful")
+                .data(data)
+                .timestamp(Instant.now())
+                .build();
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .message(message)
+                .data(data)
+                .timestamp(Instant.now())
+                .build();
+    }
+
+    public static <T> ApiResponse<T> error(String message) {
+        return ApiResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .timestamp(Instant.now())
+                .build();
+    }
+}

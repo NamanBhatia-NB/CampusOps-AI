@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+    
+    <!-- Status Badge -->
+    <span th:fragment="statusBadge(status)" class="badge badge-custom" 
+          th:classappend="'status-' + ${status}" 
+          th:text="${#strings.replace(status, '_', ' ')}">NEW</span>
+
+    <!-- Priority Badge -->
+    <span th:fragment="priorityBadge(priority)" class="badge badge-custom" 
+          th:classappend="'priority-' + ${priority}">
+        <i class="bi me-1" 
+           th:classappend="${priority == 'LOW' ? 'bi-arrow-down' : (priority == 'HIGH' ? 'bi-arrow-up text-warning' : (priority == 'URGENT' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-dash'))}"></i>
+        <span th:text="${priority}">MEDIUM</span>
+    </span>
+
+    <!-- Pagination -->
+    <nav th:fragment="pagination(page, baseUrl)" aria-label="Page navigation" th:if="${page.totalPages > 1}">
+        <ul class="pagination justify-content-center mb-0">
+            <li class="page-item" th:classappend="${page.first ? 'disabled' : ''}">
+                <a class="page-link border-0 text-muted" th:href="@{${baseUrl}(page=${page.number - 1}, size=${page.size})}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}" 
+                th:classappend="${page.number == i ? 'active' : ''}">
+                <a class="page-link border-0 rounded-circle mx-1 text-center" style="width: 36px; height: 36px;"
+                   th:href="@{${baseUrl}(page=${i}, size=${page.size})}" th:text="${i + 1}">1</a>
+            </li>
+            
+            <li class="page-item" th:classappend="${page.last ? 'disabled' : ''}">
+                <a class="page-link border-0 text-muted" th:href="@{${baseUrl}(page=${page.number + 1}, size=${page.size})}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    
+    <!-- Empty State -->
+    <div th:fragment="emptyState(title, message, iconClass)" class="text-center py-5 opacity-75">
+        <i th:class="${iconClass} + ' text-muted mb-3 d-block'" style="font-size: 3rem;"></i>
+        <h5 class="fw-semibold text-main mb-1" th:text="${title}">No data available</h5>
+        <p class="text-muted small mb-0" th:text="${message}">Check back later</p>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # MySQL Database
+  # ============================================
+  mysql:
+    image: mysql:8.0
+    container_name: campusops-mysql
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-campusops}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+      MYSQL_USER: ${DB_USERNAME:-campusops}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-campusops123}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootsecret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - campusops-network
+    command: >
+      --default-authentication-plugin=caching_sha2_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max-connections=200
+      --innodb-buffer-pool-size=256M
+
+  # ============================================
+  # Redis (Session & Cache)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: campusops-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - campusops-network
+
+  # ============================================
+  # Spring Boot Backend
+  # ============================================
+  backend:
+    build:
+      context: ./campusops-backend
+      dockerfile: Dockerfile
+    container_name: campusops-backend
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-campusops}
+      DB_USERNAME: ${DB_USERNAME:-campusops}
+      DB_PASSWORD: ${DB_PASSWORD:-campusops123}
+      JWT_SECRET: ${JWT_SECRET:-campusops-ai-production-secret-key-must-be-at-least-256-bits-long}
+      AI_PROVIDER: ${AI_PROVIDER:-fallback}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      WHATSAPP_PROVIDER: ${WHATSAPP_PROVIDER:-mock}
+      WORKER_URL: http://worker:5000
+      DEMO_MODE: ${DEMO_MODE:-true}
+      SEED_DATA: ${SEED_DATA:-true}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - campusops-network
+
+  # ============================================
+  # Python Automation Worker
+  # ============================================
+  worker:
+    build:
+      context: ./campusops-worker
+      dockerfile: Dockerfile
+    container_name: campusops-worker
+    ports:
+      - "${WORKER_PORT:-5000}:5000"
+    environment:
+      BACKEND_URL: http://backend:8080
+      GOOGLE_SHEETS_CREDENTIALS: ${GOOGLE_SHEETS_CREDENTIALS:-}
+      FLASK_ENV: ${FLASK_ENV:-production}
+    volumes:
+      - ./campusops-worker/credentials:/app/credentials:ro
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - campusops-network
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  campusops-network:
+    driver: bridge

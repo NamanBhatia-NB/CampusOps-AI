@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Tasks - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-main">My Tasks</h4>
+            <p class="text-muted small mb-0">Manage your pending follow-ups and action items.</p>
+        </div>
+        <button class="co-btn co-btn-primary" data-bs-toggle="modal" data-bs-target="#newTaskModal">
+            <i class="bi bi-plus-lg me-2"></i>New Task
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100 border-warning border-opacity-50">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded p-2 me-3"><i class="bi bi-hourglass-split fs-4"></i></div>
+                    <div class="text-muted small fw-medium text-uppercase tracking-wide">Pending</div>
+                </div>
+                <h2 class="fw-bold mb-0 text-warning" th:text="${pendingCount ?: 0}">0</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100 border-primary border-opacity-50">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3"><i class="bi bi-arrow-repeat fs-4"></i></div>
+                    <div class="text-muted small fw-medium text-uppercase tracking-wide">In Progress</div>
+                </div>
+                <h2 class="fw-bold mb-0 text-primary" th:text="${inProgressCount ?: 0}">0</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 h-100 border-success border-opacity-50">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="bg-success bg-opacity-10 text-success rounded p-2 me-3"><i class="bi bi-check-circle fs-4"></i></div>
+                    <div class="text-muted small fw-medium text-uppercase tracking-wide">Completed</div>
+                </div>
+                <h2 class="fw-bold mb-0 text-success" th:text="${completedCount ?: 0}">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-card shadow-sm p-0">
+        <div class="p-3 border-bottom border-light d-flex gap-2">
+            <a th:href="@{/tasks}" class="btn btn-sm" th:classappend="${param.filter == null ? 'btn-light active' : 'btn-outline-light text-muted border-0'}">All Tasks</a>
+            <a th:href="@{/tasks(filter='high')}" class="btn btn-sm" th:classappend="${param.filter != null && param.filter[0] == 'high' ? 'btn-light active' : 'btn-outline-light text-muted border-0'}">High Priority</a>
+            <a th:href="@{/tasks(filter='overdue')}" class="btn btn-sm" th:classappend="${param.filter != null && param.filter[0] == 'overdue' ? 'btn-light active' : 'btn-outline-light text-muted border-0'}">Overdue</a>
+        </div>
+        <div th:if="${tasks == null || tasks.empty}">
+            <div th:replace="~{fragments/components :: emptyState('No tasks assigned', 'You are all caught up!', 'bi-check2-circle text-success')}"></div>
+        </div>
+        <div class="list-group list-group-flush bg-transparent" th:if="${tasks != null && !tasks.empty}">
+            <div class="list-group-item bg-transparent border-light p-4" th:each="task : ${tasks}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex gap-3">
+                        <div class="form-check mt-1">
+                            <input class="form-check-input border-secondary" type="checkbox" value="" th:checked="${task.status == 'COMPLETED'}">
+                        </div>
+                        <div>
+                            <h6 class="mb-1 fw-bold text-main" th:classappend="${task.status == 'COMPLETED' ? 'text-decoration-line-through text-muted' : ''}" th:text="${task.title}">Task Title</h6>
+                            <p class="mb-2 small text-muted" th:text="${task.description}">Description goes here...</p>
+                            <div class="d-flex gap-3 align-items-center small">
+                                <span class="text-danger fw-medium" th:if="${task.dueDate != null}"><i class="bi bi-calendar-event me-1"></i> <span th:text="${#temporals.format(task.dueDate, 'MMM dd')}"></span></span>
+                                <a th:if="${task.leadId != null}" th:href="@{/leads/{id}(id=${task.leadId})}" class="text-primary text-decoration-none"><i class="bi bi-person me-1"></i> <span th:text="${task.leadName}">Lead</span></a>
+                                <span class="badge bg-danger-subtle text-danger" th:if="${task.priority == 'HIGH'}">High</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end glass-card shadow">
+                            <li><a class="dropdown-item" href="#">Mark as In Progress</a></li>
+                            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Task Modal -->
+    <div class="modal fade" id="newTaskModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card">
+                <div class="modal-header border-light">
+                    <h5 class="modal-title fw-bold text-main">Create New Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newTaskForm" th:action="@{/tasks}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Task Title</label>
+                            <input type="text" class="form-control bg-light border-secondary" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Description</label>
+                            <textarea class="form-control bg-light border-secondary" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small text-uppercase tracking-wide">Due Date</label>
+                                <input type="date" class="form-control bg-light border-secondary" name="dueDate">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small text-uppercase tracking-wide">Priority</label>
+                                <select class="form-select bg-light border-secondary" name="priority">
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-light px-0 pb-0 mb-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+</th:block>
+
+</body>
+</html>

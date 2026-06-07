@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Analytics - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-main">Analytics & Reports</h4>
+            <p class="text-muted small mb-0">Advanced insights and team performance metrics.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="glass-card shadow-sm h-100 p-4">
+                <h6 class="fw-semibold text-main mb-3">Conversion by Source</h6>
+                <div th:replace="~{fragments/components :: emptyState('Data Syncing', 'Not enough data to generate reports.', 'bi-pie-chart text-muted')}"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card shadow-sm h-100 p-4">
+                <h6 class="fw-semibold text-main mb-3">Counselor Performance</h6>
+                <div th:replace="~{fragments/components :: emptyState('Data Syncing', 'Not enough data to generate reports.', 'bi-bar-chart text-muted')}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

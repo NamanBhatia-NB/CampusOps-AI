@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Integrations - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-main">Integrations</h4>
+            <p class="text-muted small mb-0">Connect CampusOps AI with third-party tools.</p>
+        </div>
+    </div>
+
+    <div class="glass-card shadow-sm p-0">
+        <div th:replace="~{fragments/components :: emptyState('No active integrations', 'Connect WhatsApp, Email, or Google Sheets.', 'bi-plug text-muted')}"></div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Automation - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-main">Automation Rules</h4>
+            <p class="text-muted small mb-0">Configure triggers to automate lead follow-ups.</p>
+        </div>
+        <button class="co-btn co-btn-primary" data-bs-toggle="modal" data-bs-target="#newRuleModal">
+            <i class="bi bi-robot me-2"></i>New Rule
+        </button>
+    </div>
+
+    <div class="glass-card shadow-sm p-0">
+        <div th:if="${#lists.isEmpty(rules)}" th:replace="~{fragments/components :: emptyState('No rules configured', 'Create rules to automate your workflows.', 'bi-gear text-muted')}"></div>
+        <div class="table-responsive" th:if="${!#lists.isEmpty(rules)}">
+            <table class="table table-hover align-middle mb-0 custom-table">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Rule Name</th>
+                        <th>Trigger</th>
+                        <th>Action</th>
+                        <th>Runs</th>
+                        <th class="text-end pe-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="rule : ${rules}">
+                        <td class="ps-4">
+                            <div class="fw-semibold text-main" th:text="${rule.name}">Name</div>
+                            <div class="text-muted small" th:text="${rule.description}">Desc</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary" th:text="${rule.triggerType}">Trigger</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary" th:text="${rule.actionType}">Action</span>
+                        </td>
+                        <td th:text="${rule.runCount}">0</td>
+                        <td class="text-end pe-4">
+                            <div class="form-check form-switch d-flex justify-content-end">
+                                <input class="form-check-input" type="checkbox" role="switch" th:checked="${rule.active}" disabled>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- New Rule Modal -->
+    <div class="modal fade" id="newRuleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card">
+                <div class="modal-header border-light">
+                    <h5 class="modal-title fw-bold text-main">Create Automation Rule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newRuleForm" th:action="@{/automation}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Rule Name</label>
+                            <input type="text" class="form-control bg-light border-secondary" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Description</label>
+                            <input type="text" class="form-control bg-light border-secondary" name="description" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small text-uppercase tracking-wide">Trigger</label>
+                                <select class="form-select bg-light border-secondary" name="triggerType">
+                                    <option value="SCHEDULE">Time Based</option>
+                                    <option value="EVENT">Event Based</option>
+                                    <option value="CONDITION">Condition</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small text-uppercase tracking-wide">Condition</label>
+                                <select class="form-select bg-light border-secondary" name="triggerConfig">
+                                    <option value="INACTIVE_7_DAYS">Inactive 7 Days</option>
+                                    <option value="SCORE_DROP">Score Drop</option>
+                                    <option value="FOLLOW_UP_DUE">Follow Up Due</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small text-uppercase tracking-wide">Action</label>
+                                <select class="form-select bg-light border-secondary" name="actionType">
+                                    <option value="CREATE_TASK">Create Task</option>
+                                    <option value="UPDATE_STATUS">Update Status</option>
+                                    <option value="SEND_MESSAGE">Send Message</option>
+                                    <option value="SEND_NOTIFICATION">Send Notification</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted small text-uppercase tracking-wide">Action Value</label>
+                                <input type="text" class="form-control bg-light border-secondary" name="actionConfig" placeholder="Status or Task Title">
+                            </div>
+                        </div>
+                        <div class="modal-footer border-light px-0 pb-0 mb-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Rule</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>
+
+</body>
+</html>

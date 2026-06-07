@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+target/
+*.jar
+*.class
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Credentials
+campusops-worker/credentials/*.json
+credentials.json
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Docker
+docker-compose.override.yml
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Spring Boot Secrets
+application-secret.yml
+application-secret.properties
+application-dev.yml
+application-prod.yml
+*-secret.yml
+*-secret.properties
+
+# Uploads / Data
+uploads/
+data/
+*.sqlite
+*.db

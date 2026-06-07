@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Dashboard - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Dashboard</h3>
+            <p class="text-muted small mb-0">Welcome back, <span th:text="${#authentication.name}">User</span>. Here's what's happening today.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/dashboard(filter='today')}" class="btn btn-outline-secondary btn-sm bg-surface"><i class="bi bi-calendar3 me-2"></i>Today</a>
+            <a th:href="@{/leads/new}" class="btn btn-gradient btn-sm"><i class="bi bi-plus-lg me-2"></i>New Lead</a>
+        </div>
+    </div>
+
+    <!-- Top Stats Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="glass-card stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon primary"><i class="bi bi-people-fill"></i></div>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">+12% <i class="bi bi-arrow-up-short"></i></span>
+                </div>
+                <h2 class="fw-bold mb-1" th:text="${dashboard.totalLeads}">0</h2>
+                <div class="text-muted small fw-medium text-uppercase tracking-wide">Total Leads</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon success"><i class="bi bi-lightning-charge-fill"></i></div>
+                </div>
+                <h2 class="fw-bold mb-1"><span th:text="${dashboard.conversionRate}">0</span>%</h2>
+                <div class="text-muted small fw-medium text-uppercase tracking-wide">Conversion Rate</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon warning"><i class="bi bi-telephone-outbound-fill"></i></div>
+                    <span class="badge bg-danger text-white rounded-pill" th:if="${dashboard.pendingFollowUps > 0}">Action Needed</span>
+                </div>
+                <h2 class="fw-bold mb-1 text-warning" th:text="${dashboard.pendingFollowUps}">0</h2>
+                <div class="text-muted small fw-medium text-uppercase tracking-wide">Pending Follow-ups</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="glass-card stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon danger"><i class="bi bi-exclamation-square-fill"></i></div>
+                </div>
+                <h2 class="fw-bold mb-1 text-danger" th:text="${dashboard.overdueTasks}">0</h2>
+                <div class="text-muted small fw-medium text-uppercase tracking-wide">Overdue Tasks</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI & Status Stats -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-8">
+            <div class="glass-card h-100 p-4">
+                <h6 class="fw-bold mb-4">Lead Status Distribution</h6>
+                <div class="row text-center">
+                    <div class="col border-end border-light">
+                        <div class="text-muted small mb-2"><i class="bi bi-inbox text-primary me-1"></i>New</div>
+                        <h4 class="fw-bold mb-0 text-main" th:text="${dashboard.newLeads}">0</h4>
+                    </div>
+                    <div class="col border-end border-light">
+                        <div class="text-muted small mb-2"><i class="bi bi-telephone text-info me-1"></i>Contacted</div>
+                        <h4 class="fw-bold mb-0 text-main" th:text="${dashboard.contactedLeads}">0</h4>
+                    </div>
+                    <div class="col border-end border-light">
+                        <div class="text-muted small mb-2"><i class="bi bi-arrow-repeat text-warning me-1"></i>Follow Up</div>
+                        <h4 class="fw-bold mb-0 text-main" th:text="${dashboard.followUpLeads}">0</h4>
+                    </div>
+                    <div class="col border-end border-light">
+                        <div class="text-muted small mb-2"><i class="bi bi-star-fill text-success me-1"></i>Qualified</div>
+                        <h4 class="fw-bold mb-0 text-main" th:text="${dashboard.qualifiedLeads}">0</h4>
+                    </div>
+                    <div class="col">
+                        <div class="text-muted small mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i>Admitted</div>
+                        <h4 class="fw-bold mb-0 text-main" th:text="${dashboard.admittedLeads}">0</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card h-100 p-4 position-relative overflow-hidden">
+                <div class="position-absolute top-0 end-0 p-3 opacity-25" style="transform: rotate(15deg) scale(2);">
+                    <i class="bi bi-robot text-primary" style="font-size: 5rem;"></i>
+                </div>
+                <h6 class="fw-bold mb-3 position-relative z-1">AI Intelligence</h6>
+                
+                <div class="d-flex align-items-center mb-3 position-relative z-1">
+                    <div class="score-gauge me-3" style="width: 60px; height: 60px;" th:styleappend="'--score-deg: ' + (${dashboard.avgLeadScore} * 3.6) + 'deg;'">
+                        <span class="score-value" style="font-size: 1.25rem;" th:text="${dashboard.avgLeadScore}">0</span>
+                    </div>
+                    <div>
+                        <div class="fw-semibold">Average Lead Score</div>
+                        <div class="small text-muted">Across active pipeline</div>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 position-relative z-1 mt-auto pt-2">
+                    <div class="badge bg-danger-subtle text-danger flex-fill text-center p-2 rounded"><i class="bi bi-fire me-1"></i> <span th:text="${dashboard.hotLeads}">0</span> Hot</div>
+                    <div class="badge bg-warning-subtle text-warning flex-fill text-center p-2 rounded"><i class="bi bi-brightness-high me-1"></i> <span th:text="${dashboard.warmLeads}">0</span> Warm</div>
+                    <div class="badge bg-info-subtle text-info flex-fill text-center p-2 rounded"><i class="bi bi-snow2 me-1"></i> <span th:text="${dashboard.coldLeads}">0</span> Cold</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-8">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                    <h6 class="fw-bold mb-0">Pipeline Flow</h6>
+                    <button class="btn btn-sm btn-link text-muted"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="p-4" style="height: 300px;">
+                    <canvas id="pipelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                    <h6 class="fw-bold mb-0">Lead Sources</h6>
+                    <button class="btn btn-sm btn-link text-muted"><i class="bi bi-three-dots-vertical"></i></button>
+                </div>
+                <div class="p-4 d-flex justify-content-center" style="height: 300px;">
+                    <canvas id="sourceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="row g-4">
+        <!-- Recent Activity -->
+        <div class="col-md-8">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                    <h6 class="fw-bold mb-0">Recent Activity</h6>
+                    <a href="/admin/logs" class="btn btn-sm btn-outline-secondary bg-surface border-0">View All</a>
+                </div>
+                <div class="table-responsive" style="overflow: visible;">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${activities == null || activities.empty}">
+                                <td colspan="4">
+                                    <div th:replace="~{fragments/components :: emptyState('No recent activity', 'Things are quiet right now', 'bi-activity')}"></div>
+                                </td>
+                            </tr>
+                            <tr th:each="act : ${activities}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 small" style="width: 24px; height: 24px;" th:text="${act.userName != null ? act.userName.substring(0,1) : 'S'}">S</div>
+                                        <span th:text="${act.userName ?: 'System'}" class="small fw-medium">User</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" th:text="${act.action}">ACTION</span></td>
+                                <td class="small text-truncate" style="max-width: 300px;" th:text="${act.details}">Details...</td>
+                                <td class="small text-muted" th:text="${#temporals.format(act.createdAt, 'MMM dd, HH:mm')}">Time</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Urgent Tasks -->
+        <div class="col-md-4">
+            <div class="glass-card h-100">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-light">
+                    <h6 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-circle-fill me-2"></i>Urgent Tasks</h6>
+                </div>
+                <div class="p-0">
+                    <div th:if="${urgentTasks == null || urgentTasks.empty}" class="p-4">
+                        <div th:replace="~{fragments/components :: emptyState('All caught up', 'No urgent tasks pending', 'bi-check2-circle text-success')}"></div>
+                    </div>
+                    <div class="list-group list-group-flush" th:if="${urgentTasks != null && !urgentTasks.empty}">
+                        <a th:href="@{/leads/{id}(id=${task.leadId})}" class="list-group-item list-group-item-action border-bottom border-light p-3 border-start-0 border-end-0 bg-transparent" th:each="task : ${urgentTasks}">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0 fw-semibold text-truncate" th:text="${task.title}">Task Title</h6>
+                                <small class="text-danger fw-medium" th:text="${#temporals.format(task.dueDate, 'MMM dd')}">Date</small>
+                            </div>
+                            <p class="mb-1 small text-muted text-truncate" th:text="${'For: ' + task.leadName}">Lead info</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    </div>
+    
+    <!-- New Lead Modal -->
+    <div class="modal fade" id="newLeadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card">
+                <div class="modal-header border-light">
+                    <h5 class="modal-title fw-bold">Create New Lead</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newLeadForm" th:action="@{/leads}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Full Name</label>
+                            <input type="text" class="form-control bg-transparent border-secondary text-light" name="fullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Email</label>
+                            <input type="email" class="form-control bg-transparent border-secondary text-light" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Phone</label>
+                            <input type="tel" class="form-control bg-transparent border-secondary text-light" name="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted small text-uppercase tracking-wide">Program Interest</label>
+                            <input type="text" class="form-control bg-transparent border-secondary text-light" name="programInterest">
+                        </div>
+                        <div class="modal-footer border-light px-0 pb-0 mb-0">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-gradient">Create Lead</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<th:block layout:fragment="scripts">
+    <!-- Inline data for charts -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup colors based on theme
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? '#334155' : '#e2e8f0';
+            
+            // 1. Pipeline Chart
+            const ctxPipe = document.getElementById('pipelineChart');
+            if (ctxPipe) {
+                new Chart(ctxPipe, {
+                    type: 'bar',
+                    data: {
+                        labels: ['New', 'Contacted', 'Follow Up', 'Qualified', 'Admitted'],
+                        datasets: [{
+                            label: 'Leads',
+                            data: [
+                                /*[[${dashboard.newLeads}]]*/ 10,
+                                /*[[${dashboard.contactedLeads}]]*/ 20,
+                                /*[[${dashboard.followUpLeads}]]*/ 15,
+                                /*[[${dashboard.qualifiedLeads}]]*/ 8,
+                                /*[[${dashboard.admittedLeads}]]*/ 5
+                            ],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.8)', // New
+                                'rgba(6, 182, 212, 0.8)',  // Contacted
+                                'rgba(245, 158, 11, 0.8)', // Follow up
+                                'rgba(16, 185, 129, 0.8)', // Qualified
+                                'rgba(5, 150, 105, 0.8)'   // Admitted
+                            ],
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
+                            x: { grid: { display: false }, ticks: { color: textColor } }
+                        }
+                    }
+                });
+            }
+            
+            // 2. Source Chart
+            const sourceMap = /*[[${sourceMap}]]*/ {'Website': 10, 'Referral': 5, 'WhatsApp': 8};
+            const ctxSource = document.getElementById('sourceChart');
+            if (ctxSource && sourceMap && Object.keys(sourceMap).length > 0) {
+                new Chart(ctxSource, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(sourceMap),
+                        datasets: [{
+                            data: Object.values(sourceMap),
+                            backgroundColor: [
+                                '#4f46e5', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: textColor, padding: 20, usePointStyle: true, boxWidth: 8 } }
+                        }
+                    }
+                });
+            }
+        });
+        /*]]>*/
+    </script>
+</th:block>
+
+</body>
+</html>

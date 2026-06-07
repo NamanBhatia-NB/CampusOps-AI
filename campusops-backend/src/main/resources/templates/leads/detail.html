@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title th:text="${lead.fullName + ' - CampusOps AI'}">Lead Detail</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <a th:href="@{/leads}" class="btn btn-sm btn-light border me-3 rounded-circle" style="width:32px;height:32px;padding:0;line-height:30px;text-align:center;"><i class="bi bi-arrow-left"></i></a>
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm fs-4 fw-bold" style="width: 56px; height: 56px;" th:text="${lead.fullName.substring(0,1).toUpperCase()}">A</div>
+            <div>
+                <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                    <span th:text="${lead.fullName}">John Doe</span>
+                    <div th:replace="~{fragments/components :: statusBadge(${lead.status})}"></div>
+                </h3>
+                <div class="text-muted small d-flex gap-3">
+                    <span th:if="${lead.phone}"><i class="bi bi-telephone text-primary me-1"></i> <span th:text="${lead.phone}"></span></span>
+                    <span th:if="${lead.email}"><i class="bi bi-envelope text-primary me-1"></i> <span th:text="${lead.email}"></span></span>
+                    <span><i class="bi bi-geo-alt text-primary me-1"></i> <span th:text="${lead.city ?: 'Unknown'}"></span></span>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary bg-surface" data-bs-toggle="modal" data-bs-target="#statusModal">Update Status</button>
+            <a th:href="@{/leads/{id}/edit(id=${lead.id})}" class="btn btn-outline-primary bg-surface"><i class="bi bi-pencil me-1"></i> Edit</a>
+        </div>
+    </div>
+
+    <!-- Pipeline Visual -->
+    <div class="glass-card p-4 mb-4 border-light overflow-hidden">
+        <div class="pipeline-steps mx-md-5">
+            <div class="pipeline-step" th:classappend="${lead.status == 'NEW' ? 'active' : (lead.status != 'NEW' ? 'completed' : '')}">
+                <div class="step-dot"></div>
+                <div class="step-label">New</div>
+            </div>
+            <div class="pipeline-step" th:classappend="${lead.status == 'CONTACTED' ? 'active' : (lead.status == 'FOLLOW_UP' || lead.status == 'QUALIFIED' || lead.status == 'ADMITTED' ? 'completed' : '')}">
+                <div class="step-dot"></div>
+                <div class="step-label">Contacted</div>
+            </div>
+            <div class="pipeline-step" th:classappend="${lead.status == 'FOLLOW_UP' ? 'active' : (lead.status == 'QUALIFIED' || lead.status == 'ADMITTED' ? 'completed' : '')}">
+                <div class="step-dot"></div>
+                <div class="step-label">Follow Up</div>
+            </div>
+            <div class="pipeline-step" th:classappend="${lead.status == 'QUALIFIED' ? 'active' : (lead.status == 'ADMITTED' ? 'completed' : '')}">
+                <div class="step-dot"></div>
+                <div class="step-label">Qualified</div>
+            </div>
+            <div class="pipeline-step" th:classappend="${lead.status == 'ADMITTED' ? 'active' : ''}">
+                <div class="step-dot"></div>
+                <div class="step-label">Admitted</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Lead Info -->
+            <div class="glass-card mb-4 border-light overflow-hidden">
+                <div class="p-3 border-bottom border-light bg-surface-hover d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Profile Details</h6>
+                    <div th:replace="~{fragments/components :: priorityBadge(${lead.priority})}"></div>
+                </div>
+                <div class="p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase tracking-wide fw-semibold mb-1">Academic Interest</label>
+                            <div class="fw-medium" th:text="${lead.programInterest ?: '-'}">MBA</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase tracking-wide fw-semibold mb-1">Current Qualification</label>
+                            <div class="fw-medium" th:text="${lead.qualification ?: '-'}">B.Tech</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase tracking-wide fw-semibold mb-1">Source</label>
+                            <div class="fw-medium" th:text="${lead.source ?: '-'}">Website</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small text-muted text-uppercase tracking-wide fw-semibold mb-1">Assigned Owner</label>
+                            <div class="d-flex align-items-center fw-medium">
+                                <i class="bi bi-person-circle text-primary me-2"></i>
+                                <span th:text="${lead.ownerName ?: 'Unassigned'}">Counselor</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes & Activity Timeline -->
+            <div class="glass-card mb-4 border-light">
+                <div class="p-3 border-bottom border-light">
+                    <ul class="nav nav-pills small" id="timelineTabs">
+                        <li class="nav-item"><a class="nav-link active rounded-pill px-3 py-1" data-bs-toggle="pill" href="#notes">Notes</a></li>
+                        <li class="nav-item ms-2"><a class="nav-link rounded-pill px-3 py-1" data-bs-toggle="pill" href="#activity">Activity Log</a></li>
+                    </ul>
+                </div>
+                <div class="p-4">
+                    <div class="tab-content">
+                        <!-- Notes Tab -->
+                        <div class="tab-pane fade show active" id="notes">
+                            <!-- Add Note Form -->
+                            <form th:action="@{/leads/{id}/notes(id=${lead.id})}" method="post" class="mb-4">
+                                <div class="mb-2">
+                                    <textarea class="form-control bg-surface border-light focus-ring" name="content" rows="3" placeholder="Write a note... Use @ to mention team members." required></textarea>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="isInternal" name="isInternal" checked>
+                                        <label class="form-check-label small text-muted" for="isInternal">Internal Note</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm px-4">Add Note</button>
+                                </div>
+                            </form>
+                            
+                            <hr class="border-light opacity-50 mb-4">
+                            
+                            <!-- Notes Timeline -->
+                            <div class="timeline" th:if="${notes != null && !notes.empty}">
+                                <div class="timeline-item" th:each="note : ${notes}">
+                                    <div class="glass-card p-3 shadow-sm border-0 bg-surface">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center me-2 small fw-bold" style="width: 28px; height: 28px;" th:text="${note.author.fullName.substring(0,1)}">U</div>
+                                                <div>
+                                                    <div class="fw-semibold small lh-1" th:text="${note.author.fullName}">User Name</div>
+                                                    <small class="text-muted" style="font-size: 0.7rem;" th:text="${#temporals.format(note.createdAt, 'MMM dd, yyyy HH:mm')}">Time</small>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill" style="font-size: 0.65rem;" th:if="${note.isInternal}">INTERNAL</span>
+                                        </div>
+                                        <p class="mb-0 small text-main" style="white-space: pre-line;" th:text="${note.content}">Note content</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:if="${notes == null || notes.empty}" class="text-center py-4 text-muted small">
+                                <i class="bi bi-journal-text fs-3 d-block mb-2 opacity-50"></i>
+                                No notes added yet.
+                            </div>
+                        </div>
+                        
+                        <!-- Activity Tab -->
+                        <div class="tab-pane fade" id="activity">
+                            <div class="timeline" th:if="${activities != null && !activities.empty}">
+                                <div class="timeline-item" th:each="act : ${activities}">
+                                    <div class="small">
+                                        <span class="fw-semibold text-main" th:text="${act.userName ?: 'System'}">User</span>
+                                        <span class="text-muted" th:text="${act.details}">Did something</span>
+                                        <div class="text-muted mt-1" style="font-size: 0.7rem;" th:text="${#temporals.format(act.createdAt, 'MMM dd, yyyy HH:mm')}">Time</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            
+            <!-- AI Intelligence Card -->
+            <div class="glass-card mb-4 border-light overflow-hidden position-relative" th:if="${lead.leadScore != null}">
+                <div class="position-absolute top-0 end-0 w-100 h-100" style="background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent); z-index: 0; pointer-events: none;"></div>
+                <div class="p-3 border-bottom border-light d-flex justify-content-between align-items-center position-relative z-1">
+                    <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-robot me-2"></i>AI Insight</h6>
+                    <span class="badge rounded-pill" th:classappend="${lead.classification == 'HOT' ? 'bg-danger' : (lead.classification == 'WARM' ? 'bg-warning' : 'bg-info')}" th:text="${lead.classification}">HOT</span>
+                </div>
+                <div class="p-4 position-relative z-1">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="score-gauge me-3 shadow-sm" th:styleappend="'--score-deg: ' + (${lead.leadScore} * 3.6) + 'deg;'">
+                            <span class="score-value" th:text="${lead.leadScore}">85</span>
+                        </div>
+                        <div>
+                            <div class="fw-bold mb-1">Lead Score</div>
+                            <div class="small text-muted" th:text="${lead.classification == 'HOT' ? 'High conversion probability' : (lead.classification == 'WARM' ? 'Needs nurturing' : 'Low engagement')}">Description</div>
+                        </div>
+                    </div>
+                    
+                    <div class="small text-main mb-3" th:text="${lead.aiSummary}">AI summary goes here.</div>
+                    
+                    <div class="p-3 bg-primary-light rounded-3 border border-primary border-opacity-25">
+                        <div class="small fw-bold text-primary mb-1"><i class="bi bi-lightbulb me-1"></i> Recommended Action</div>
+                        <div class="small" th:text="${lead.recommendedAction}">Call them.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-card mb-4 border-light p-4 text-center" th:if="${lead.leadScore == null}">
+                <i class="bi bi-robot text-muted opacity-50 mb-3 d-block" style="font-size: 2.5rem;"></i>
+                <h6 class="fw-bold">No AI Insights yet</h6>
+                <p class="small text-muted mb-3">AI evaluates engagement after initial contact and interactions.</p>
+                <button class="btn btn-sm btn-outline-primary rounded-pill">Generate Insight</button>
+            </div>
+
+            <!-- Conversations Card -->
+            <div class="glass-card mb-4 border-light">
+                <div class="p-3 border-bottom border-light d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Conversations</h6>
+                    <button class="btn btn-sm btn-link text-primary p-0" data-bs-toggle="modal" data-bs-target="#newChatModal"><i class="bi bi-plus-circle-fill"></i></button>
+                </div>
+                <div class="list-group list-group-flush" th:if="${conversations != null && !conversations.empty}">
+                    <a th:href="@{/leads/{id}/conversation/{cid}(id=${lead.id}, cid=${conv.id})}" class="list-group-item list-group-item-action bg-transparent p-3" th:each="conv : ${conversations}">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div class="d-flex align-items-center">
+                                <i class="me-2 text-success bi" th:classappend="${conv.channel == 'WHATSAPP' ? 'bi-whatsapp' : 'bi-envelope'}"></i>
+                                <span class="fw-semibold small" th:text="${conv.subject}">Chat</span>
+                            </div>
+                            <span class="badge bg-danger rounded-pill" th:if="${conv.unreadCount > 0}" th:text="${conv.unreadCount}">1</span>
+                        </div>
+                        <div class="small text-muted text-truncate" th:text="${conv.lastMessage ?: 'No messages yet'}">Hello...</div>
+                    </a>
+                </div>
+                <div th:if="${conversations == null || conversations.empty}" class="p-4 text-center">
+                    <span class="small text-muted">No active conversations</span>
+                </div>
+            </div>
+            
+            <!-- Tasks Card -->
+            <div class="glass-card border-light">
+                <div class="p-3 border-bottom border-light d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Tasks</h6>
+                    <button class="btn btn-sm btn-link text-primary p-0"><i class="bi bi-plus-circle-fill"></i></button>
+                </div>
+                <div class="list-group list-group-flush" th:if="${tasks != null && !tasks.empty}">
+                    <div class="list-group-item bg-transparent p-3" th:each="task : ${tasks}">
+                        <div class="form-check">
+                            <input class="form-check-input mt-1" type="checkbox" th:checked="${task.status == 'COMPLETED'}">
+                            <label class="form-check-label w-100">
+                                <div class="fw-medium small" th:classappend="${task.status == 'COMPLETED' ? 'text-decoration-line-through text-muted' : ''}" th:text="${task.title}">Task</div>
+                                <div class="small text-muted d-flex justify-content-between mt-1">
+                                    <span th:text="${#temporals.format(task.dueDate, 'MMM dd')}">Date</span>
+                                    <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.6rem;" th:text="${task.assignedToName}">User</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${tasks == null || tasks.empty}" class="p-4 text-center">
+                    <span class="small text-muted">No pending tasks</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <!-- Status Update Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card border-0">
+                <div class="modal-header border-light">
+                    <h5 class="modal-title fw-bold">Update Lead Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/leads/{id}/status(id=${lead.id})}" method="post">
+                    <div class="modal-body p-4">
+                        <select class="form-select mb-3" name="status" required>
+                            <option th:each="stat : ${T(com.campusops.entity.enums.LeadStatus).values()}"
+                                    th:value="${stat}" th:text="${stat}" th:selected="${lead.status == stat.name()}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="modal-footer border-light">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+</body>
+</html>

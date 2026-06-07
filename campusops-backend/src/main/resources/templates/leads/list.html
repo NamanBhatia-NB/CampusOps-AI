@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>Leads - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    
+    <!-- Header & Toolbar -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0">Lead Management</h3>
+        <a th:href="@{/leads/new}" class="btn btn-gradient shadow-sm"><i class="bi bi-person-plus-fill me-2"></i>Add Lead</a>
+    </div>
+
+    <div class="glass-card mb-4 p-3 border-light">
+        <form th:action="@{/leads}" method="get" class="row g-2 align-items-center" id="filterForm">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" th:value="${param.search}" class="form-control border-start-0 ps-0 bg-transparent" placeholder="Search name, email...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select bg-transparent" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">All Statuses</option>
+                    <option th:each="stat : ${T(com.campusops.entity.enums.LeadStatus).values()}"
+                            th:value="${stat}" th:text="${stat}" th:selected="${param.status != null and param.status[0] == stat.name()}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="priority" class="form-select bg-transparent" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">All Priorities</option>
+                    <option th:each="prio : ${T(com.campusops.entity.enums.Priority).values()}"
+                            th:value="${prio}" th:text="${prio}" th:selected="${param.priority != null and param.priority[0] == prio.name()}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-2 text-end ms-auto">
+                <a th:href="@{/leads}" class="btn btn-link text-muted text-decoration-none small">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Leads Table -->
+    <div class="glass-card border-light">
+        <div class="table-responsive" style="overflow: visible;">
+            <table class="table table-custom mb-0 table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Name / Contact</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Program</th>
+                        <th>Owner</th>
+                        <th>Next Follow-up</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${leads.empty}">
+                        <td colspan="7">
+                            <div th:replace="~{fragments/components :: emptyState('No leads found', 'Try adjusting your filters or add a new lead', 'bi-inbox')}"></div>
+                        </td>
+                    </tr>
+                    <tr th:each="lead : ${leads.content}" style="cursor: pointer;" th:onclick="'window.location.href=\'/leads/' + ${lead.id} + '\''">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 40px; height: 40px;" th:text="${lead.fullName.substring(0,1).toUpperCase()}">A</div>
+                                <div>
+                                    <div class="fw-semibold text-main mb-1" th:text="${lead.fullName}">John Doe</div>
+                                    <div class="text-muted small d-flex gap-2">
+                                        <span th:if="${lead.phone}"><i class="bi bi-telephone me-1"></i><span th:text="${lead.phone}"></span></span>
+                                        <span th:if="${lead.email}"><i class="bi bi-envelope me-1"></i><span th:text="${lead.email}"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div th:replace="~{fragments/components :: statusBadge(${lead.status})}"></div>
+                        </td>
+                        <td>
+                            <div th:replace="~{fragments/components :: priorityBadge(${lead.priority})}"></div>
+                        </td>
+                        <td>
+                            <span class="small fw-medium" th:text="${lead.programInterest ?: 'Not specified'}">MBA</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle text-muted me-1"></i>
+                                <span class="small text-muted" th:text="${lead.ownerName ?: 'Unassigned'}">Counselor</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small fw-medium" th:classappend="${lead.nextFollowUp != null && T(java.time.LocalDateTime).parse(lead.nextFollowUp).isBefore(T(java.time.LocalDateTime).now()) ? 'text-danger' : 'text-muted'}"
+                                 th:text="${lead.nextFollowUp != null ? #temporals.format(T(java.time.LocalDateTime).parse(lead.nextFollowUp), 'MMM dd, yyyy HH:mm') : 'None'}">Date</div>
+                        </td>
+                        <td class="text-end" onclick="event.stopPropagation()">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-link text-muted" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                    <li><a class="dropdown-item small" th:href="@{/leads/{id}(id=${lead.id})}"><i class="bi bi-eye me-2"></i>View Details</a></li>
+                                    <li><a class="dropdown-item small" th:href="@{/leads/{id}/edit(id=${lead.id})}"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form th:action="@{/leads/{id}/delete(id=${lead.id})}" method="post" class="form-delete">
+                                            <button class="dropdown-item small text-danger"><i class="bi bi-trash me-2"></i>Delete</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination Component -->
+        <div class="p-3 border-top border-light" th:if="${!leads.empty}">
+            <div th:replace="~{fragments/components :: pagination(${leads}, '/leads')}"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

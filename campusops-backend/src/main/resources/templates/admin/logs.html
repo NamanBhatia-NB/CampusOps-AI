@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/main-layout}">
+<head>
+    <title>System Logs - CampusOps AI</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1 text-main">System Logs</h4>
+            <p class="text-muted small mb-0">View recent activity and audit logs.</p>
+        </div>
+    </div>
+
+    <div class="glass-card shadow-sm p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 custom-table">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Details</th>
+                        <th class="text-end pe-4">IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td class="ps-4">
+                            <span class="text-muted small" th:text="${#temporals.format(log.createdAt, 'MMM dd, HH:mm:ss')}"></span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-secondary bg-opacity-25 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                                    <span class="small fw-bold" th:text="${log.userName != 'System' ? log.userName.substring(0,1) : 'S'}"></span>
+                                </div>
+                                <span class="fw-medium text-main" th:text="${log.userName}">User</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle" th:text="${log.action}">Action</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary" th:text="${log.entityType}">Entity</span>
+                        </td>
+                        <td>
+                            <span class="text-muted small" th:text="${log.details}">Details</span>
+                        </td>
+                        <td class="text-end pe-4 text-muted small" th:text="${log.ipAddress != null ? log.ipAddress : '-'}">-</td>
+                    </tr>
+                    <tr th:if="${logs.empty}">
+                        <td colspan="6" class="text-center py-4 text-muted">No activity logs found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
